@@ -59,7 +59,7 @@ function CommunityPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <PageHeader title={data.community.name} description={data.community.description ?? undefined}>
+      <PageHeader title={data.community.name} description={data.community.description ?? ""}>
         {user ? (
           <Button className="rounded-full" disabled={toggle.isPending} onClick={() => toggle.mutate()}>
             {joined ? "Leave community" : "Join community"}

@@ -56,7 +56,7 @@ function ProfilePage() {
 
   const save = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("profiles").update(form).eq("id", user!.id);
+      const { error } = await supabase.from("profiles").update(form as never).eq("id", user!.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -94,7 +94,7 @@ function ProfilePage() {
         ))}
         <div className="space-y-2">
           <Label htmlFor="bio">Bio</Label>
-          <Textarea id="bio" maxLength={500} value={form.bio ?? ""} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
+          <Textarea id="bio" maxLength={500} value={form["bio"] ?? ""} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
         </div>
         <Button className="rounded-full" disabled={save.isPending} onClick={() => save.mutate()}>
           {save.isPending ? "Saving…" : "Save changes"}
