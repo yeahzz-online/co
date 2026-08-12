@@ -98,7 +98,7 @@ function Home() {
           </div>
         ) : (
           <EmptyState
-            icon={CalendarDays}
+            icon={<CalendarDays className="size-6" aria-hidden="true" />}
             title="No upcoming events yet"
             description="New events will appear here as soon as organizers publish them."
           />
@@ -127,7 +127,7 @@ function Home() {
           </div>
         ) : (
           <EmptyState
-            icon={GraduationCap}
+            icon={<GraduationCap className="size-6" aria-hidden="true" />}
             title="No classes scheduled"
             description="Check back soon for new workshops and sessions."
           />
@@ -164,7 +164,7 @@ function Home() {
           </div>
         ) : (
           <EmptyState
-            icon={Users}
+            icon={<Users className="size-6" aria-hidden="true" />}
             title="No communities yet"
             description="Communities created by organizers will show up here."
           />

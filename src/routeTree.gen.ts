@@ -14,6 +14,10 @@ import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as ClassesRouteImport } from './routes/classes'
 import { Route as CommunitiesRouteImport } from './routes/communities'
 import { Route as EventsRouteImport } from './routes/events'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as MyRegistrationsRouteImport } from './routes/my-registrations'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ClassesClassIdRouteImport } from './routes/classes.$classId'
 import { Route as CommunitiesCommunityIdRouteImport } from './routes/communities.$communityId'
@@ -44,6 +48,26 @@ const EventsRoute = EventsRouteImport.update({
   path: '/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyRegistrationsRoute = MyRegistrationsRouteImport.update({
+  id: '/my-registrations',
+  path: '/my-registrations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
@@ -71,6 +95,10 @@ export interface FileRoutesByFullPath {
   '/classes': typeof ClassesRouteWithChildren
   '/communities': typeof CommunitiesRouteWithChildren
   '/events': typeof EventsRouteWithChildren
+  '/login': typeof LoginRoute
+  '/my-registrations': typeof MyRegistrationsRoute
+  '/notifications': typeof NotificationsRoute
+  '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/classes/$classId': typeof ClassesClassIdRoute
   '/communities/$communityId': typeof CommunitiesCommunityIdRoute
@@ -82,6 +110,10 @@ export interface FileRoutesByTo {
   '/classes': typeof ClassesRouteWithChildren
   '/communities': typeof CommunitiesRouteWithChildren
   '/events': typeof EventsRouteWithChildren
+  '/login': typeof LoginRoute
+  '/my-registrations': typeof MyRegistrationsRoute
+  '/notifications': typeof NotificationsRoute
+  '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/classes/$classId': typeof ClassesClassIdRoute
   '/communities/$communityId': typeof CommunitiesCommunityIdRoute
@@ -94,6 +126,10 @@ export interface FileRoutesById {
   '/classes': typeof ClassesRouteWithChildren
   '/communities': typeof CommunitiesRouteWithChildren
   '/events': typeof EventsRouteWithChildren
+  '/login': typeof LoginRoute
+  '/my-registrations': typeof MyRegistrationsRoute
+  '/notifications': typeof NotificationsRoute
+  '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/classes/$classId': typeof ClassesClassIdRoute
   '/communities/$communityId': typeof CommunitiesCommunityIdRoute
@@ -107,6 +143,10 @@ export interface FileRouteTypes {
     | '/classes'
     | '/communities'
     | '/events'
+    | '/login'
+    | '/my-registrations'
+    | '/notifications'
+    | '/register'
     | '/search'
     | '/classes/$classId'
     | '/communities/$communityId'
@@ -118,6 +158,10 @@ export interface FileRouteTypes {
     | '/classes'
     | '/communities'
     | '/events'
+    | '/login'
+    | '/my-registrations'
+    | '/notifications'
+    | '/register'
     | '/search'
     | '/classes/$classId'
     | '/communities/$communityId'
@@ -129,6 +173,10 @@ export interface FileRouteTypes {
     | '/classes'
     | '/communities'
     | '/events'
+    | '/login'
+    | '/my-registrations'
+    | '/notifications'
+    | '/register'
     | '/search'
     | '/classes/$classId'
     | '/communities/$communityId'
@@ -141,6 +189,10 @@ export interface RootRouteChildren {
   ClassesRoute: typeof ClassesRouteWithChildren
   CommunitiesRoute: typeof CommunitiesRouteWithChildren
   EventsRoute: typeof EventsRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  MyRegistrationsRoute: typeof MyRegistrationsRoute
+  NotificationsRoute: typeof NotificationsRoute
+  RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
 }
 
@@ -179,6 +231,34 @@ declare module '@tanstack/react-router' {
       path: '/events'
       fullPath: '/events'
       preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-registrations': {
+      id: '/my-registrations'
+      path: '/my-registrations'
+      fullPath: '/my-registrations'
+      preLoaderRoute: typeof MyRegistrationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -252,6 +332,10 @@ const rootRouteChildren: RootRouteChildren = {
   ClassesRoute: ClassesRouteWithChildren,
   CommunitiesRoute: CommunitiesRouteWithChildren,
   EventsRoute: EventsRouteWithChildren,
+  LoginRoute: LoginRoute,
+  MyRegistrationsRoute: MyRegistrationsRoute,
+  NotificationsRoute: NotificationsRoute,
+  RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
 }
 export const routeTree = rootRouteImport
