@@ -10,9 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as ClassesRouteImport } from './routes/classes'
+import { Route as CommunitiesRouteImport } from './routes/communities'
 import { Route as EventsRouteImport } from './routes/events'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as ClassesClassIdRouteImport } from './routes/classes.$classId'
+import { Route as CommunitiesCommunityIdRouteImport } from './routes/communities.$communityId'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -20,9 +24,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClassesRoute = ClassesRouteImport.update({
   id: '/classes',
   path: '/classes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunitiesRoute = CommunitiesRouteImport.update({
+  id: '/communities',
+  path: '/communities',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EventsRoute = EventsRouteImport.update({
@@ -30,10 +44,20 @@ const EventsRoute = EventsRouteImport.update({
   path: '/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClassesClassIdRoute = ClassesClassIdRouteImport.update({
   id: '/$classId',
   path: '/$classId',
   getParentRoute: () => ClassesRoute,
+} as any)
+const CommunitiesCommunityIdRoute = CommunitiesCommunityIdRouteImport.update({
+  id: '/$communityId',
+  path: '/$communityId',
+  getParentRoute: () => CommunitiesRoute,
 } as any)
 const EventsEventIdRoute = EventsEventIdRouteImport.update({
   id: '/$eventId',
@@ -43,45 +67,81 @@ const EventsEventIdRoute = EventsEventIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/calendar': typeof CalendarRoute
   '/classes': typeof ClassesRouteWithChildren
+  '/communities': typeof CommunitiesRouteWithChildren
   '/events': typeof EventsRouteWithChildren
+  '/search': typeof SearchRoute
   '/classes/$classId': typeof ClassesClassIdRoute
+  '/communities/$communityId': typeof CommunitiesCommunityIdRoute
   '/events/$eventId': typeof EventsEventIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/calendar': typeof CalendarRoute
   '/classes': typeof ClassesRouteWithChildren
+  '/communities': typeof CommunitiesRouteWithChildren
   '/events': typeof EventsRouteWithChildren
+  '/search': typeof SearchRoute
   '/classes/$classId': typeof ClassesClassIdRoute
+  '/communities/$communityId': typeof CommunitiesCommunityIdRoute
   '/events/$eventId': typeof EventsEventIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/calendar': typeof CalendarRoute
   '/classes': typeof ClassesRouteWithChildren
+  '/communities': typeof CommunitiesRouteWithChildren
   '/events': typeof EventsRouteWithChildren
+  '/search': typeof SearchRoute
   '/classes/$classId': typeof ClassesClassIdRoute
+  '/communities/$communityId': typeof CommunitiesCommunityIdRoute
   '/events/$eventId': typeof EventsEventIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/classes' | '/events' | '/classes/$classId' | '/events/$eventId'
+    | '/'
+    | '/calendar'
+    | '/classes'
+    | '/communities'
+    | '/events'
+    | '/search'
+    | '/classes/$classId'
+    | '/communities/$communityId'
+    | '/events/$eventId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/classes' | '/events' | '/classes/$classId' | '/events/$eventId'
+  to:
+    | '/'
+    | '/calendar'
+    | '/classes'
+    | '/communities'
+    | '/events'
+    | '/search'
+    | '/classes/$classId'
+    | '/communities/$communityId'
+    | '/events/$eventId'
   id:
     | '__root__'
     | '/'
+    | '/calendar'
     | '/classes'
+    | '/communities'
     | '/events'
+    | '/search'
     | '/classes/$classId'
+    | '/communities/$communityId'
     | '/events/$eventId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CalendarRoute: typeof CalendarRoute
   ClassesRoute: typeof ClassesRouteWithChildren
+  CommunitiesRoute: typeof CommunitiesRouteWithChildren
   EventsRoute: typeof EventsRouteWithChildren
+  SearchRoute: typeof SearchRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -93,11 +153,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/classes': {
       id: '/classes'
       path: '/classes'
       fullPath: '/classes'
       preLoaderRoute: typeof ClassesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/communities': {
+      id: '/communities'
+      path: '/communities'
+      fullPath: '/communities'
+      preLoaderRoute: typeof CommunitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/events': {
@@ -107,12 +181,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/classes/$classId': {
       id: '/classes/$classId'
       path: '/$classId'
       fullPath: '/classes/$classId'
       preLoaderRoute: typeof ClassesClassIdRouteImport
       parentRoute: typeof ClassesRoute
+    }
+    '/communities/$communityId': {
+      id: '/communities/$communityId'
+      path: '/$communityId'
+      fullPath: '/communities/$communityId'
+      preLoaderRoute: typeof CommunitiesCommunityIdRouteImport
+      parentRoute: typeof CommunitiesRoute
     }
     '/events/$eventId': {
       id: '/events/$eventId'
@@ -135,6 +223,18 @@ const ClassesRouteChildren: ClassesRouteChildren = {
 const ClassesRouteWithChildren =
   ClassesRoute._addFileChildren(ClassesRouteChildren)
 
+interface CommunitiesRouteChildren {
+  CommunitiesCommunityIdRoute: typeof CommunitiesCommunityIdRoute
+}
+
+const CommunitiesRouteChildren: CommunitiesRouteChildren = {
+  CommunitiesCommunityIdRoute: CommunitiesCommunityIdRoute,
+}
+
+const CommunitiesRouteWithChildren = CommunitiesRoute._addFileChildren(
+  CommunitiesRouteChildren,
+)
+
 interface EventsRouteChildren {
   EventsEventIdRoute: typeof EventsEventIdRoute
 }
@@ -148,8 +248,11 @@ const EventsRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CalendarRoute: CalendarRoute,
   ClassesRoute: ClassesRouteWithChildren,
+  CommunitiesRoute: CommunitiesRouteWithChildren,
   EventsRoute: EventsRouteWithChildren,
+  SearchRoute: SearchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
