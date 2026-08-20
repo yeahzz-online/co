@@ -25,6 +25,7 @@ service cloud.firestore {
         'department', 'year', 'section', 'bio', 'avatar_url',
         'email', 'institution', 'branch', 'skills',
         'learning_interests', 'learning_goal', 'profile_interests',
+        'role', 'roles',
         'member_id', 'points', 'credits', 'referrals', 'tasks_completed',
         'status', 'referral_access', 'whatsapp_verified', 'referral_code',
         'referred_by', 'created_at', 'updated_at'

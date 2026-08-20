@@ -23,7 +23,8 @@ const interests = [
   "Web3 & Blockchain",
 ];
 const whatsappCommunityUrl = (import.meta.env["VITE_WHATSAPP_CHANNEL_URL"] ||
-  import.meta.env["VITE_WHATSAPP_COMMUNITY_URL"]) as string | undefined;
+  import.meta.env["VITE_WHATSAPP_COMMUNITY_URL"] ||
+  "https://chat.whatsapp.com/LcPp2HwBW8YGtOJTky8rir") as string;
 
 function JoinPage() {
   const navigate = useNavigate();

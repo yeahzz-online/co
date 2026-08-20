@@ -14,7 +14,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider, useAuth, useProfile } from "@/hooks/use-auth";
-import { MobileTabBar, SiteFooter, SiteNav } from "@/components/site-nav";
+import { SiteFooter, SiteNav } from "@/components/site-nav";
 import { Toaster } from "@/components/ui/sonner";
 import "@/integrations/firebase/client";
 import copexLogo from "@/assets/copex-logo.png";
@@ -134,22 +134,30 @@ function RootComponent() {
 
 function AppFrame() {
   const { loading } = useAuth();
-  return <>
-    <ProfileAccessGate />
-    {loading ? <BrandLoader /> : null}
-    <div className="relative flex min-h-screen flex-col">
-      <SiteNav />
-      <main className="flex-1 pt-20"><Outlet /></main>
-      <SiteFooter />
-      <MobileTabBar />
-    </div>
-    <Toaster position="top-center" />
-  </>;
+  return (
+    <>
+      <ProfileAccessGate />
+      {loading ? <BrandLoader /> : null}
+      <div className="relative flex min-h-screen flex-col">
+        <SiteNav />
+        <main className="flex-1 pt-20">
+          <Outlet />
+        </main>
+        <SiteFooter />
+      </div>
+      <Toaster position="top-center" />
+    </>
+  );
 }
 
 function BrandLoader() {
   return (
-    <div className="fixed inset-0 z-[100] grid place-items-center !bg-white" style={{ backgroundColor: "#ffffff" }} role="status" aria-label="Loading COPEX">
+    <div
+      className="fixed inset-0 z-[100] grid place-items-center !bg-white"
+      style={{ backgroundColor: "#ffffff" }}
+      role="status"
+      aria-label="Loading COPEX"
+    >
       <img src={copexFlag} alt="COPEX" className="size-64 object-contain" />
     </div>
   );
@@ -161,9 +169,24 @@ function ProfileAccessGate() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   useEffect(() => {
-    if (loading || isLoading || !user || pathname === "/join" || pathname === "/login" || pathname === "/register") return;
-    const member = profile as (typeof profile & { institution?: string; profile_interests?: string[] }) | null;
-    if (!member?.full_name || !member.institution || !member.year || !member.profile_interests?.length) navigate({ to: "/join", replace: true });
+    if (
+      loading ||
+      isLoading ||
+      !user ||
+      pathname === "/join" ||
+      pathname === "/login" ||
+      pathname === "/register"
+    )
+      return;
+    const member = profile as
+      (typeof profile & { institution?: string; profile_interests?: string[] }) | null;
+    if (
+      !member?.full_name ||
+      !member.institution ||
+      !member.year ||
+      !member.profile_interests?.length
+    )
+      navigate({ to: "/join", replace: true });
   }, [isLoading, loading, navigate, pathname, profile, user]);
   return null;
 }

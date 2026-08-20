@@ -1,4 +1,4 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
@@ -28,7 +28,6 @@ import {
 import { firebaseSignOut } from "@/integrations/firebase/auth";
 import { useAuth, usePermissions, useProfile } from "@/hooks/use-auth";
 import { notificationsQuery } from "@/lib/data";
-import { cn } from "@/lib/utils";
 
 const NAV = [
   { to: "/", label: "Home", icon: Home },
@@ -36,14 +35,6 @@ const NAV = [
   { to: "/resources", label: "Resources", icon: BookOpen },
   { to: "/communities", label: "Communities", icon: Users },
   { to: "/calendar", label: "Calendar", icon: CalendarDays },
-] as const;
-
-const MOBILE_NAV = [
-  { to: "/", label: "Home", icon: Home },
-  { to: "/events", label: "Events", icon: Sparkles },
-  { to: "/resources", label: "Resources", icon: BookOpen },
-  { to: "/calendar", label: "Calendar", icon: CalendarDays },
-  { to: "/my-registrations", label: "Tickets", icon: Ticket },
 ] as const;
 
 function Logo() {
@@ -346,55 +337,71 @@ export function SiteNav() {
   );
 }
 
-export function MobileTabBar() {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-
-  return (
-    <nav
-      className="glass-strong fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 rounded-3xl p-1.5 md:hidden"
-      aria-label="Primary mobile"
-    >
-      {MOBILE_NAV.map((item) => {
-        const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
-        return (
-          <Link
-            key={item.to}
-            to={item.to}
-            className={cn(
-              "flex flex-col items-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-semibold transition-colors",
-              active ? "bg-primary/15 text-primary" : "text-muted-foreground",
-            )}
-          >
-            <item.icon className="size-4" aria-hidden="true" />
-            <span className="truncate">{item.label}</span>
-          </Link>
-        );
-      })}
-    </nav>
-  );
-}
-
 export function SiteFooter() {
   return (
-    <footer className="mx-auto mt-24 max-w-7xl px-4 pb-28 md:pb-10">
-      <div className="glass-panel flex flex-col gap-4 rounded-3xl px-6 py-7 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <p className="font-display text-lg font-bold">COPEX Community</p>
-          <p className="mt-1 text-sm text-muted-foreground">Learn. Connect. Participate.</p>
+    <footer className="mx-auto mt-24 w-full max-w-7xl px-4 pb-10 sm:px-8 lg:px-12">
+      <div className="glass-panel overflow-hidden rounded-[2rem]">
+        <div className="grid gap-10 px-6 py-8 sm:px-8 lg:grid-cols-[1.4fr_1fr_1fr] lg:px-10 lg:py-10">
+          <div>
+            <Link to="/" className="inline-flex" aria-label="COPEX Community home">
+              <img
+                src="/copex-logo.png"
+                alt="COPEX"
+                className="h-12 w-36 object-contain object-left"
+              />
+            </Link>
+            <p className="mt-4 max-w-sm text-sm leading-6 text-muted-foreground">
+              A student-led community to learn, connect, build, and find opportunities together.
+            </p>
+            <Link
+              to="/about"
+              className="mt-5 inline-flex text-sm font-semibold text-primary hover:underline"
+            >
+              Meet the team
+            </Link>
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              Explore
+            </p>
+            <div className="mt-4 grid gap-3 text-sm">
+              <Link to="/events" className="hover:text-primary">
+                Events
+              </Link>
+              <Link to="/resources" className="hover:text-primary">
+                Resources
+              </Link>
+              <Link to="/communities" className="hover:text-primary">
+                Communities
+              </Link>
+              <Link to="/calendar" className="hover:text-primary">
+                Calendar
+              </Link>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              Community
+            </p>
+            <div className="mt-4 grid gap-3 text-sm">
+              <Link to="/join" className="hover:text-primary">
+                Join COPEX
+              </Link>
+              <Link to="/about" className="hover:text-primary">
+                About COPEX
+              </Link>
+              <Link to="/privacy" className="hover:text-primary">
+                Privacy
+              </Link>
+              <Link to="/terms" className="hover:text-primary">
+                Terms
+              </Link>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
-          <Link to="/events" className="hover:text-foreground">
-            Events
-          </Link>
-          <Link to="/resources" className="hover:text-foreground">
-            Resources
-          </Link>
-          <Link to="/communities" className="hover:text-foreground">
-            Communities
-          </Link>
-          <Link to="/calendar" className="hover:text-foreground">
-            Calendar
-          </Link>
+        <div className="flex flex-col gap-2 border-t border-glass-border px-6 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-10">
+          <p>© {new Date().getFullYear()} COPEX Community. Built for students.</p>
+          <p>Learn. Connect. Participate.</p>
         </div>
       </div>
     </footer>
