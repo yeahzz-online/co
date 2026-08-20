@@ -1265,11 +1265,14 @@ function AdminPage() {
                   </p>
                 </div>
                 <GlassCard className="overflow-x-auto p-0">
-                  <table className="w-full min-w-[900px] text-left text-xs">
+                  <table className="w-full min-w-[1400px] text-left text-xs">
                     <thead className="border-b border-glass-border bg-glass-strong text-muted-foreground">
                       <tr>
                         <th className="px-4 py-3">Member</th>
-                        <th className="px-4 py-3">Profile</th>
+                        <th className="px-4 py-3">Contact</th>
+                        <th className="px-4 py-3">Study details</th>
+                        <th className="px-4 py-3">Interests</th>
+                        <th className="px-4 py-3">Referral details</th>
                         <th className="px-4 py-3">Points</th>
                         <th className="px-4 py-3">Credits</th>
                         <th className="px-4 py-3">Referrals</th>
@@ -1296,7 +1299,12 @@ function AdminPage() {
                                 <p className="font-semibold">
                                   {member.full_name ?? "Unnamed member"}
                                 </p>
-                                <p className="text-muted-foreground">{member.email ?? member.id}</p>
+                              </td>
+                              <td className="px-4 py-3">
+                                <p>{member.email ?? "Email missing"}</p>
+                                <p className="mt-1 text-muted-foreground">
+                                  {member.phone ?? "Phone missing"}
+                                </p>
                               </td>
                               <td className="px-4 py-3">
                                 <Pill
@@ -1305,8 +1313,25 @@ function AdminPage() {
                                 >
                                   {member.status ?? "INCOMPLETE"}
                                 </Pill>
+                                <p className="mt-1">{member.institution ?? "College missing"}</p>
                                 <p className="mt-1 text-muted-foreground">
-                                  {member.institution ?? "Details missing"}
+                                  {member.branch ?? ""}
+                                  {member.branch && member.year ? " · " : ""}
+                                  {member.year ?? "Year missing"}
+                                </p>
+                              </td>
+                              <td className="max-w-[230px] px-4 py-3 text-muted-foreground">
+                                {member.profile_interests?.length
+                                  ? member.profile_interests.join(", ")
+                                  : "Interests missing"}
+                              </td>
+                              <td className="px-4 py-3">
+                                <p>Invited: {member.referred_by ?? "Direct join"}</p>
+                                <p className="mt-1 text-muted-foreground">
+                                  Code: {member.referral_code ?? "Not set"}
+                                </p>
+                                <p className="mt-1 font-semibold">
+                                  Successful: {member.referrals ?? 0}
                                 </p>
                               </td>
                               <td className="px-4 py-3 font-semibold">{member.points ?? 0}</td>
