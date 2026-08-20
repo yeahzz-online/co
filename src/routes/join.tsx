@@ -88,7 +88,7 @@ function JoinPage() {
         ...(referral ? { referred_by: referral } : {}),
         whatsapp_verified: false,
       });
-      if (referral && referral !== uid && !profile?.referred_by) {
+      if (referral && referral !== uid) {
         await recordReferral(referral, uid);
       }
     },

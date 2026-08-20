@@ -4,6 +4,7 @@ import {
   collectionRef,
   deleteDoc,
   documentRef,
+  getDoc,
   getDocs,
   query,
   setDoc,
@@ -137,8 +138,10 @@ export function referralsQuery(userId: string | undefined) {
 
 export async function recordReferral(referrerId: string, referredUserId: string) {
   if (!referrerId || referrerId === referredUserId) return;
+  const referralRef = documentRef(`referrals/${referrerId}_${referredUserId}`);
+  if ((await getDoc(referralRef)).exists()) return;
   await setDoc(
-    documentRef(`referrals/${referrerId}_${referredUserId}`),
+    referralRef,
     {
       referrer_id: referrerId,
       referred_user_id: referredUserId,
