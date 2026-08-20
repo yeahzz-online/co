@@ -66,7 +66,7 @@ service cloud.firestore {
         && request.resource.data.referred_user_id == request.auth.uid
         && request.resource.data.referrer_id != request.auth.uid
         && request.resource.data.keys().hasOnly(['referrer_id', 'referred_user_id', 'created_at']);
-      allow read: if signedIn() && resource.data.referrer_id == request.auth.uid;
+      allow read: if isAdmin() || (signedIn() && resource.data.referrer_id == request.auth.uid);
       allow update: if signedIn()
         && (resource.data.referrer_id == request.auth.uid
           || resource.data.referred_user_id == request.auth.uid)

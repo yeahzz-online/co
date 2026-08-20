@@ -187,9 +187,19 @@ function AdminPage() {
           .select("id, content_type, reason, status, created_at", { count: "exact" }),
         getDocs(collectionRef<FirestoreUserProfile>("users")),
       ]);
+      const referralsSnapshot = await getDocs(collectionRef<Record<string, unknown>>("referrals"));
+      const referralCounts = referralsSnapshot.docs.reduce<Record<string, number>>(
+        (counts, snapshot) => {
+          const referrerId = snapshot.data().referrer_id;
+          if (typeof referrerId === "string") counts[referrerId] = (counts[referrerId] ?? 0) + 1;
+          return counts;
+        },
+        {},
+      );
       const profiles = usersSnapshot.docs.map((snapshot) => ({
         id: snapshot.id,
         ...snapshot.data(),
+        referrals: referralCounts[snapshot.id] ?? snapshot.data().referrals ?? 0,
       }));
       return {
         activitiesCount: activities.count ?? 0,
@@ -352,14 +362,12 @@ function AdminPage() {
     mutationFn: async () => {
       const title = opportunityTitle.trim();
       if (!title) throw new Error("Enter an opportunity title.");
-      const { error } = await firebaseStore
-        .from("opportunities")
-        .insert({
-          title,
-          organization: opportunityOrganization.trim() || null,
-          kind: opportunityKind,
-          created_by: user?.uid ?? null,
-        });
+      const { error } = await firebaseStore.from("opportunities").insert({
+        title,
+        organization: opportunityOrganization.trim() || null,
+        kind: opportunityKind,
+        created_by: user?.uid ?? null,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
