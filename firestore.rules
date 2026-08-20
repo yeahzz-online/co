@@ -67,7 +67,13 @@ service cloud.firestore {
         && request.resource.data.referrer_id != request.auth.uid
         && request.resource.data.keys().hasOnly(['referrer_id', 'referred_user_id', 'created_at']);
       allow read: if signedIn() && resource.data.referrer_id == request.auth.uid;
-      allow update, delete: if false;
+      allow update: if signedIn()
+        && (resource.data.referrer_id == request.auth.uid
+          || resource.data.referred_user_id == request.auth.uid)
+        && request.resource.data.referrer_id == resource.data.referrer_id
+        && request.resource.data.referred_user_id == resource.data.referred_user_id
+        && request.resource.data.keys().hasOnly(['referrer_id', 'referred_user_id', 'created_at']);
+      allow delete: if false;
     }
 
     match /notifications/{notificationId} {
