@@ -22,6 +22,21 @@ const interests = [
   "Cybersecurity",
   "Product & Design",
   "Web3 & Blockchain",
+  "ECE Core",
+  "Embedded Systems",
+  "VLSI & Chip Design",
+  "IoT & Smart Devices",
+  "Robotics & Automation",
+  "PCB Design",
+  "Microcontrollers",
+  "Signal Processing",
+  "Computer Networks",
+  "Data Science",
+  "Competitive Programming",
+  "Research & Innovation",
+  "Entrepreneurship",
+  "Open Source",
+  "Career & Placements",
 ];
 const whatsappCommunityUrl = (import.meta.env["VITE_WHATSAPP_CHANNEL_URL"] ||
   import.meta.env["VITE_WHATSAPP_COMMUNITY_URL"] ||
