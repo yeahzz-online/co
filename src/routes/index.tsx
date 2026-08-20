@@ -1,25 +1,29 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, CalendarDays, GraduationCap, Sparkles, Users } from "lucide-react";
+import { ArrowRight, BookOpen, CalendarDays, ExternalLink, Sparkles, Users } from "lucide-react";
+import { useMemo } from "react";
 
 import { ActivityCard } from "@/components/activity-card";
-import { CardSkeletonGrid, EmptyState, GlassCard, SectionHeading } from "@/components/ui-kit";
+import { CardSkeletonGrid, EmptyState, GlassCard, Pill, SectionHeading } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
 import { activitiesQuery, communitiesQuery } from "@/lib/data";
+import { getStoredResources } from "@/lib/resources";
+import { useProfile } from "@/hooks/use-auth";
+import { getResourceIcon } from "./resources";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "COPEX Community — Events, Classes & Clubs" },
+      { title: "COPEX Community — Events, Resources & Clubs" },
       {
         name: "description",
         content:
-          "Discover campus events, workshops, hackathons and live classes. Register in seconds and join communities on COPEX.",
+          "Discover campus events, developer resources, hackathons, and study kits. Register in seconds and join communities on COPEX.",
       },
-      { property: "og:title", content: "COPEX Community — Events, Classes & Clubs" },
+      { property: "og:title", content: "COPEX Community — Events, Resources & Clubs" },
       {
         property: "og:description",
-        content: "Discover campus events, workshops and live classes. Register in seconds.",
+        content: "Discover campus events, developer resources, and hackathons. Register in seconds.",
       },
     ],
   }),
@@ -28,8 +32,10 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const events = useQuery(activitiesQuery({ kind: "event", window: "upcoming" }));
-  const classes = useQuery(activitiesQuery({ kind: "class", window: "upcoming" }));
   const communities = useQuery(communitiesQuery());
+  const resources = useMemo(() => getStoredResources(), []);
+  const { data: profile } = useProfile();
+  const learningInterests = (profile as (typeof profile & { learning_interests?: string[] }) | null)?.learning_interests ?? [];
 
   return (
     <div className="mx-auto max-w-7xl px-4 pt-10 sm:px-6">
@@ -38,11 +44,11 @@ function Home() {
           <Sparkles className="size-3.5" aria-hidden="true" /> COPEX Community
         </span>
         <h1 className="mt-6 max-w-3xl font-display text-4xl font-black leading-[1.05] tracking-tight sm:text-6xl">
-          Every event, class and club on campus — in one place.
+          Every event, resource and club on campus — in one place.
         </h1>
         <p className="mt-5 max-w-xl text-base text-muted-foreground sm:text-lg">
-          Browse workshops, hackathons and live classes, register as an individual or a team,
-          and keep every ticket in your pocket.
+          Browse workshops, hackathon kits, code templates, and guides. Register as an individual or team,
+          and keep every resource at your fingertips.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Button asChild size="lg" className="rounded-full">
@@ -51,14 +57,14 @@ function Home() {
             </Link>
           </Button>
           <Button asChild size="lg" variant="secondary" className="rounded-full">
-            <Link to="/classes">Browse classes</Link>
+            <Link to="/resources">Explore resources</Link>
           </Button>
         </div>
 
         <dl className="mt-12 grid gap-4 sm:grid-cols-3">
           {[
             { icon: Sparkles, label: "Live events", value: events.data?.length ?? 0 },
-            { icon: GraduationCap, label: "Open classes", value: classes.data?.length ?? 0 },
+            { icon: BookOpen, label: "Study Resources", value: resources.length },
             { icon: Users, label: "Communities", value: communities.data?.length ?? 0 },
           ].map((stat) => (
             <GlassCard key={stat.label} className="flex items-center gap-4 p-5">
@@ -76,6 +82,9 @@ function Home() {
         </dl>
       </section>
 
+      {learningInterests.length ? <section className="mt-8"><GlassCard className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs font-semibold uppercase tracking-widest text-primary">Personalized for you</p><h2 className="mt-2 font-display text-xl font-bold">Your learning path starts here</h2><p className="mt-1 text-sm text-muted-foreground">Explore recommendations based on your interests: {learningInterests.slice(0, 4).join(", ")}.</p></div><Button asChild className="shrink-0 rounded-full"><Link to="/resources">Explore recommendations <ArrowRight className="size-4" /></Link></Button></GlassCard></section> : null}
+
+      {/* Upcoming Events */}
       <section className="mt-20">
         <SectionHeading
           title="Upcoming events"
@@ -105,35 +114,53 @@ function Home() {
         )}
       </section>
 
+      {/* Resources & Kits Section */}
       <section className="mt-20">
         <SectionHeading
-          title="Classes & workshops"
-          description="Structured sessions with instructors, outcomes and levels."
+          title="Resources & Developer Kits"
+          description="Roadmaps, hackathon boilerplates, design tokens, and exam study guides."
           action={
             <Button asChild variant="ghost" size="sm" className="rounded-full">
-              <Link to="/classes">
+              <Link to="/resources">
                 See all <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
             </Button>
           }
         />
-        {classes.isLoading ? (
-          <CardSkeletonGrid count={3} />
-        ) : classes.data?.length ? (
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {classes.data.slice(0, 6).map((a) => (
-              <ActivityCard key={a.id} activity={a} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            icon={<GraduationCap className="size-6" aria-hidden="true" />}
-            title="No classes scheduled"
-            description="Check back soon for new workshops and sessions."
-          />
-        )}
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {resources.slice(0, 6).map((res) => {
+            const Icon = getResourceIcon(res.type);
+            return (
+              <Link key={res.id} to="/resources/$resourceId" params={{ resourceId: res.id }}>
+                <GlassCard className="glass-hover group flex h-full flex-col p-6 transition-transform duration-300 hover:-translate-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary">
+                      <Icon className="size-4" aria-hidden="true" />
+                    </span>
+                    <Pill tone={res.featured ? "primary" : "neutral"} className="text-[10px]">
+                      {res.category}
+                    </Pill>
+                  </div>
+                  <h3 className="mt-4 font-display text-base font-bold group-hover:text-primary transition-colors">
+                    {res.title}
+                  </h3>
+                  <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                    {res.description}
+                  </p>
+                  <div className="mt-auto pt-4 flex items-center justify-between border-t border-glass-border/60 text-xs text-muted-foreground">
+                    <span>{res.author_name}</span>
+                    <span className="inline-flex items-center gap-1 font-semibold text-primary">
+                      View <ExternalLink className="size-3" />
+                    </span>
+                  </div>
+                </GlassCard>
+              </Link>
+            );
+          })}
+        </div>
       </section>
 
+      {/* Communities Section */}
       <section className="mt-20">
         <SectionHeading
           title="Communities"

@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import { CalendarDays, Clock, MapPin, Users, Video } from "lucide-react";
 
 import { Pill } from "@/components/ui-kit";
-import { Button } from "@/components/ui/button";
 import { type ActivityRow, categoryLabel } from "@/lib/copex";
 import { formatDate, formatDuration, formatTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -39,9 +38,12 @@ export function ActivityCard({
 
 
   return (
-    <article
+    <Link
+      to="/events/$eventId"
+      params={{ eventId: activity.id }}
+      aria-label={`View full details for ${activity.title}`}
       className={cn(
-        "glass-panel glass-hover group flex h-full flex-col overflow-hidden rounded-3xl",
+        "glass-panel glass-hover group flex h-full cursor-pointer flex-col overflow-hidden rounded-none no-underline",
         className,
       )}
     >
@@ -106,28 +108,15 @@ export function ActivityCard({
 
         <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-1">
           <Pill tone={state.tone}>{state.label}</Pill>
-          <Button asChild size="sm" variant="secondary">
-            {isClass ? (
-              <Link to="/classes/$classId" params={{ classId: activity.id }}>
-                View class
-              </Link>
-            ) : (
-              <Link to="/events/$eventId" params={{ eventId: activity.id }}>
-                View event
-              </Link>
-            )}
-          </Button>
-
+          <span className="inline-flex h-9 items-center rounded-xl bg-secondary px-3 text-sm font-medium text-secondary-foreground">View details</span>
         </div>
 
         {activity.organizer_name || activity.instructor_name ? (
           <p className="truncate text-xs text-muted-foreground">
-            {isClass
-              ? `Instructor · ${activity.instructor_name ?? "TBA"}`
-              : `Organized by ${activity.organizer_name ?? "COPEX"}`}
+            Organized by {activity.organizer_name ?? activity.instructor_name ?? "COPEX"}
           </p>
         ) : null}
       </div>
-    </article>
+    </Link>
   );
 }

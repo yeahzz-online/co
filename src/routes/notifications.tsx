@@ -4,8 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { EmptyState, GlassCard, PageHeader, RowSkeleton } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
-import { notificationsQuery } from "@/lib/data";
+import { markNotificationsRead, notificationsQuery } from "@/lib/data";
 import { formatRelative } from "@/lib/format";
 
 export const Route = createFileRoute("/notifications")({
@@ -23,12 +22,11 @@ export const Route = createFileRoute("/notifications")({
 function NotificationsPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery(notificationsQuery(user?.id));
+  const { data, isLoading } = useQuery(notificationsQuery(user?.uid));
 
   const markAll = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("notifications").update({ read: true }).eq("user_id", user!.id).eq("read", false);
-      if (error) throw error;
+      await markNotificationsRead(user!.uid);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications"] }),
   });
@@ -48,14 +46,19 @@ function NotificationsPage() {
             <GlassCard key={n.id} className="p-5">
               <div className="flex items-start justify-between gap-3">
                 <p className="font-semibold">{n.title}</p>
-                {!n.read ? <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" /> : null}
+                {!n.read ? (
+                  <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" />
+                ) : null}
               </div>
               {n.body ? <p className="mt-1 text-sm text-muted-foreground">{n.body}</p> : null}
               <p className="mt-2 text-xs text-muted-foreground">{formatRelative(n.created_at)}</p>
             </GlassCard>
           ))
         ) : (
-          <EmptyState title="You're all caught up" description="Notifications about your registrations will appear here." />
+          <EmptyState
+            title="You're all caught up"
+            description="Notifications about your registrations will appear here."
+          />
         )}
       </div>
     </div>

@@ -6,8 +6,7 @@ import { ActivityCard } from "@/components/activity-card";
 import { GlassCard, PageHeader, Spinner } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
-import { communityQuery, myMembershipsQuery } from "@/lib/data";
+import { communityQuery, myMembershipsQuery, removeCommunityMembership, saveCommunityMembership } from "@/lib/data";
 import { formatDateTime } from "@/lib/format";
 
 export const Route = createFileRoute("/communities/$communityId")({
@@ -27,24 +26,13 @@ function CommunityPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { data, isLoading } = useQuery(communityQuery(communityId));
-  const memberships = useQuery(myMembershipsQuery(user?.id));
+  const memberships = useQuery(myMembershipsQuery(user?.uid));
   const joined = memberships.data?.includes(communityId) ?? false;
 
   const toggle = useMutation({
     mutationFn: async () => {
-      if (joined) {
-        const { error } = await supabase
-          .from("community_members")
-          .delete()
-          .eq("community_id", communityId)
-          .eq("user_id", user!.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("community_members")
-          .insert({ community_id: communityId, user_id: user!.id });
-        if (error) throw error;
-      }
+      if (joined) await removeCommunityMembership(communityId, user!.uid);
+      else await saveCommunityMembership(communityId, user!.uid);
     },
     onSuccess: () => {
       toast.success(joined ? "Left community" : "Joined community");

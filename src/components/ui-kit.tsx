@@ -17,7 +17,7 @@ export function GlassCard({
   return (
     <div
       className={cn(
-        "glass-panel rounded-3xl",
+        "glass-panel rounded-none",
         interactive && "glass-hover",
         className,
       )}
@@ -157,7 +157,7 @@ export function CardSkeletonGrid({ count = 6 }: { count?: number }) {
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="glass-panel overflow-hidden rounded-3xl" aria-hidden="true">
+        <div key={i} className="glass-panel overflow-hidden rounded-none" aria-hidden="true">
           <div className="h-40 animate-pulse bg-glass-strong" />
           <div className="space-y-3 p-5">
             <div className="h-3 w-24 animate-pulse rounded-full bg-glass-strong" />
@@ -175,7 +175,7 @@ export function RowSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div className="space-y-3" aria-hidden="true">
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="glass-panel h-20 animate-pulse rounded-3xl" />
+        <div key={i} className="glass-panel h-20 animate-pulse rounded-none" />
       ))}
     </div>
   );

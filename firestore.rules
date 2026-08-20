@@ -1,0 +1,146 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    // Set the admin custom claim from a trusted server only.
+    function isAdmin() {
+      return signedIn()
+        && (request.auth.token.admin == true
+          || (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles != null
+            && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.hasAny(['admin']))
+          || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+
+    function profileFields() {
+      return [
+        'full_name', 'phone', 'roll_number', 'employee_id',
+        'department', 'year', 'section', 'bio', 'avatar_url',
+        'email', 'institution', 'branch', 'skills',
+        'learning_interests', 'learning_goal', 'profile_interests',
+        'member_id', 'points', 'credits', 'referrals', 'tasks_completed',
+        'status', 'referral_access', 'whatsapp_verified', 'referral_code',
+        'referred_by', 'created_at', 'updated_at'
+      ];
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasOnly(profileFields());
+      allow update: if isAdmin()
+        || (isOwner(userId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(profileFields()));
+
+      allow delete: if isAdmin();
+    }
+
+    match /colleges/{collegeId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /communities/{communityId} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /community_members/{membershipId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.user_id == request.auth.uid;
+      allow delete: if signedIn() && resource.data.user_id == request.auth.uid;
+      allow update: if isAdmin();
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if signedIn() && (resource.data.user_id == request.auth.uid || isAdmin());
+      allow update: if signedIn() && resource.data.user_id == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow create, delete: if isAdmin();
+    }
+
+    match /opportunities/{opportunityId} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /college_representatives/{representativeId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /content_reports/{reportId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /forms/{formId} {
+      allow read: if resource.data.status == 'published' || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /form_questions/{questionId} {
+      allow read: if isAdmin() || get(/databases/$(database)/documents/forms/$(resource.data.form_id)).data.status == 'published';
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /form_submissions/{submissionId} {
+      allow create: if signedIn()
+        && request.resource.data.user_id == request.auth.uid
+        && request.resource.data.keys().hasOnly([
+          'id', 'form_id', 'user_id', 'submission_id', 'submitted_at', 'status', 'answers'
+        ])
+        && get(/databases/$(database)/documents/forms/$(request.resource.data.form_id)).data.status == 'published';
+      allow read: if isAdmin() || (signedIn() && resource.data.user_id == request.auth.uid);
+      allow update: if isAdmin()
+        || (signedIn()
+          && resource.data.user_id == request.auth.uid
+          && get(/databases/$(database)/documents/forms/$(resource.data.form_id)).data.allow_edit == true
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['answers', 'submitted_at']));
+      allow delete: if isAdmin();
+    }
+
+    match /activities/{activityId} {
+      allow read: if resource.data.published == true || isAdmin() || (signedIn() && resource.data.organizer_id == request.auth.uid);
+      allow create: if signedIn() && request.resource.data.organizer_id == request.auth.uid;
+      allow update, delete: if isAdmin() || (signedIn() && resource.data.organizer_id == request.auth.uid && request.resource.data.organizer_id == request.auth.uid);
+    }
+
+    match /registrations/{registrationId} {
+      allow create: if signedIn() && request.resource.data.user_id == request.auth.uid;
+      allow read: if isAdmin() || (signedIn() && (resource.data.user_id == request.auth.uid || get(/databases/$(database)/documents/activities/$(resource.data.activity_id)).data.organizer_id == request.auth.uid));
+      allow update: if isAdmin() || (signedIn() && resource.data.user_id == request.auth.uid);
+      allow delete: if isAdmin() || (signedIn() && resource.data.user_id == request.auth.uid);
+    }
+
+    match /activity_schedule/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin() || (signedIn() && get(/databases/$(database)/documents/activities/$(request.resource.data.activity_id)).data.organizer_id == request.auth.uid);
+    }
+
+    match /activity_speakers/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin() || (signedIn() && get(/databases/$(database)/documents/activities/$(request.resource.data.activity_id)).data.organizer_id == request.auth.uid);
+    }
+
+    match /activity_faqs/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin() || (signedIn() && get(/databases/$(database)/documents/activities/$(request.resource.data.activity_id)).data.organizer_id == request.auth.uid);
+    }
+
+    match /announcements/{announcementId} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Deny every collection that has not been explicitly designed yet.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

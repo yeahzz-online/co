@@ -1,75 +1,15 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Github, Mail, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-
 import { GlassCard } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { lovable } from "@/integrations/lovable/index";
-import { supabase } from "@/integrations/supabase/client";
+import { signInWithGitHub, signInWithGoogle } from "@/integrations/firebase/auth";
 
-export const Route = createFileRoute("/login")({
-  head: () => ({
-    meta: [
-      { title: "Sign in — COPEX Community" },
-      { name: "description", content: "Sign in to register for COPEX events, classes and communities." },
-      { property: "og:title", content: "Sign in — COPEX Community" },
-      { property: "og:description", content: "Sign in to register for COPEX events and classes." },
-    ],
-  }),
-  component: LoginPage,
-});
+export const Route = createFileRoute("/login")({ component: LoginPage });
 
 function LoginPage() {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    setBusy(false);
-    if (error) { toast.error(error.message); return; }
-    navigate({ to: "/" });
-  }
-
-  async function handleGoogle() {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) { toast.error("Google sign-in failed"); return; }
-    if (result.redirected) return;
-    navigate({ to: "/" });
-  }
-
-  return (
-    <div className="mx-auto flex max-w-md flex-col px-4 py-16">
-      <GlassCard className="p-8">
-        <h1 className="font-display text-2xl font-bold">Welcome back</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Sign in to manage your registrations.</p>
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" required maxLength={255} value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-          </div>
-          <Button type="submit" className="w-full rounded-full" disabled={busy}>
-            {busy ? "Signing in…" : "Sign in"}
-          </Button>
-        </form>
-        <Button variant="secondary" className="mt-3 w-full rounded-full" onClick={handleGoogle}>
-          Continue with Google
-        </Button>
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          New here? <Link to="/register" className="text-primary">Create an account</Link>
-        </p>
-      </GlassCard>
-    </div>
-  );
+  const navigate = useNavigate(); const [busy, setBusy] = useState<"google" | "github" | null>(null);
+  async function handle(provider: "google" | "github") { setBusy(provider); try { if (provider === "google") await signInWithGoogle(); else await signInWithGitHub(); navigate({ to: "/" }); } catch (error) { toast.error(error instanceof Error ? error.message : "Sign in failed"); } finally { setBusy(null); } }
+  return <div className="mx-auto flex max-w-md flex-col px-4 py-16"><GlassCard className="p-8 text-center"><span className="mx-auto grid size-12 place-items-center rounded-2xl bg-primary/15 text-primary"><Sparkles className="size-5" /></span><h1 className="mt-5 font-display text-2xl font-bold">Welcome back</h1><p className="mt-2 text-sm text-muted-foreground">Sign in securely to access your community account.</p><div className="mt-7 space-y-3"><Button className="w-full rounded-full" disabled={!!busy} onClick={() => handle("google")}>{busy === "google" ? "Connecting…" : <><Mail className="size-4" /> Continue with Google</>}</Button><Button variant="secondary" className="w-full rounded-full" disabled={!!busy} onClick={() => handle("github")}>{busy === "github" ? "Connecting…" : <><Github className="size-4" /> Continue with GitHub</>}</Button></div><p className="mt-6 text-sm text-muted-foreground">New to the community? <Link to="/join" className="text-primary">Join now</Link></p></GlassCard></div>;
 }

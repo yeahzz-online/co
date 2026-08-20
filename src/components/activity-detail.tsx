@@ -19,9 +19,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth, useProfile } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
 import { categoryLabel } from "@/lib/copex";
 import { activityQuery } from "@/lib/data";
+import { getFirestoreRegistration, saveFirestoreRegistration } from "@/lib/firestore-app";
 import { formatDate, formatDateTime, formatDuration, formatTime } from "@/lib/format";
 
 export function ActivityDetail({ id, kind }: { id: string; kind: "event" | "class" }) {
@@ -33,25 +33,16 @@ export function ActivityDetail({ id, kind }: { id: string; kind: "event" | "clas
   const [form, setForm] = useState({ team_name: "", notes: "" });
 
   const existing = useQuery({
-    queryKey: ["registration", id, user?.id],
+    queryKey: ["registration", id, user?.uid],
     enabled: !!user,
-    queryFn: async () => {
-      const { data: row, error } = await supabase
-        .from("registrations")
-        .select("*")
-        .eq("activity_id", id)
-        .eq("user_id", user!.id)
-        .maybeSingle();
-      if (error) throw error;
-      return row;
-    },
+    queryFn: () => getFirestoreRegistration(id, user!.uid),
   });
 
   const register = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("registrations").insert({
+      await saveFirestoreRegistration({
         activity_id: id,
-        user_id: user!.id,
+        user_id: user!.uid,
         reg_type: data!.activity.registration_type,
         full_name: profile?.full_name ?? null,
         email: profile?.email ?? user!.email ?? null,
@@ -64,7 +55,6 @@ export function ActivityDetail({ id, kind }: { id: string; kind: "event" | "clas
         team_name: form.team_name || null,
         notes: form.notes || null,
       });
-      if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Registration submitted");

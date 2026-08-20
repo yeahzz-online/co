@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -9,9 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth, useProfile } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { saveProfile } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/profile")({
+  beforeLoad: () => {
+    throw redirect({ to: "/dashboard" });
+  },
   head: () => ({
     meta: [
       { title: "Your profile — COPEX Community" },
@@ -56,8 +59,7 @@ function ProfilePage() {
 
   const save = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("profiles").update(form as never).eq("id", user!.id);
-      if (error) throw error;
+      await saveProfile(user!.uid, form);
     },
     onSuccess: () => {
       toast.success("Profile updated");
@@ -80,6 +82,15 @@ function ProfilePage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
       <PageHeader title="Your profile" description="These details prefill every registration form." />
+      {profile?.avatar_url ? (
+        <div className="mt-8 flex items-center gap-4">
+          <img src={profile.avatar_url} alt="Profile" className="size-16 rounded-full object-cover ring-4 ring-primary/10" />
+          <div>
+            <p className="font-medium">Profile photo</p>
+            <p className="text-sm text-muted-foreground">Synced from your Google or GitHub account.</p>
+          </div>
+        </div>
+      ) : null}
       <GlassCard className="mt-8 space-y-4 p-6">
         {FIELDS.map(([key, label]) => (
           <div key={key} className="space-y-2">

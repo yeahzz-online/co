@@ -1,67 +1,51 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Session, User } from "@supabase/supabase-js";
+import { getAuth, getIdTokenResult, onAuthStateChanged, type User } from "firebase/auth";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-import { supabase } from "@/integrations/supabase/client";
+import { requireFirebaseApp } from "@/integrations/firebase/client";
+import { documentRef, getDoc, saveUserProfile, type FirestoreUserProfile } from "@/integrations/firebase/firestore";
+import { firebaseSignOut } from "@/integrations/firebase/auth";
 import type { AppRole, ProfileRow } from "@/lib/copex";
 
-type AuthContextValue = {
-  session: Session | null;
-  user: User | null;
-  loading: boolean;
-};
-
-const AuthContext = createContext<AuthContextValue>({
-  session: null,
-  user: null,
-  loading: true,
-});
+type AuthContextValue = { user: User | null; loading: boolean };
+const AuthContext = createContext<AuthContextValue>({ user: null, loading: true });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
-      setSession(next);
+    const unsubscribe = onAuthStateChanged(getAuth(requireFirebaseApp()), (nextUser) => {
+      setUser(nextUser);
       setLoading(false);
-      if (event === "SIGNED_IN" || event === "USER_UPDATED") {
-        queryClient.invalidateQueries();
-      }
-      if (event === "SIGNED_OUT") {
-        queryClient.clear();
-      }
+      if (nextUser) queryClient.invalidateQueries();
+      else queryClient.clear();
     });
-
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
-
-    return () => sub.subscription.unsubscribe();
+    return unsubscribe;
   }, [queryClient]);
 
-  return (
-    <AuthContext.Provider value={{ session, user: session?.user ?? null, loading }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, loading }}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export function useAuth() { return useContext(AuthContext); }
 
 export function useRoles() {
   const { user } = useAuth();
   return useQuery({
-    queryKey: ["roles", user?.id],
+    queryKey: ["roles", user?.uid],
     enabled: !!user,
     queryFn: async (): Promise<AppRole[]> => {
-      const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", user!.id);
-      if (error) throw error;
-      return (data ?? []).map((r) => r.role);
+      const [snapshot, tokenResult] = await Promise.all([
+        getDoc(documentRef(`users/${user!.uid}`)),
+        getIdTokenResult(user!),
+      ]);
+      const profile = snapshot.data() as FirestoreUserProfile | undefined;
+      const roles = profile?.roles ?? (profile?.role ? [profile.role] : []);
+      const validRoles = roles.filter((role): role is AppRole => role === "admin" || role === "organizer");
+      return tokenResult.claims.admin === true && !validRoles.includes("admin")
+        ? [...validRoles, "admin"]
+        : validRoles;
     },
   });
 }
@@ -69,26 +53,21 @@ export function useRoles() {
 export function useProfile() {
   const { user } = useAuth();
   return useQuery({
-    queryKey: ["profile", user?.id],
+    queryKey: ["profile", user?.uid],
     enabled: !!user,
     queryFn: async (): Promise<ProfileRow | null> => {
-      const { data, error } = await supabase.from("profiles").select("*").eq("id", user!.id).maybeSingle();
-      if (error) throw error;
-      return data;
+      const snapshot = await getDoc(documentRef(`users/${user!.uid}`));
+      if (!snapshot.exists()) return null;
+      const profile = snapshot.data() as FirestoreUserProfile;
+      return { ...profile, id: user!.uid, email: profile.email ?? user!.email, created_at: profile.created_at ?? new Date().toISOString(), updated_at: profile.updated_at ?? new Date().toISOString() } as ProfileRow;
     },
   });
 }
 
 export function usePermissions() {
-  const { data: roles = [] } = useRoles();
-  return {
-    roles,
-    isAdmin: roles.includes("admin"),
-    isOrganizer: roles.includes("organizer"),
-    isStaff: roles.includes("admin") || roles.includes("organizer"),
-  };
+  const { data: roles = [], isLoading } = useRoles();
+  return { roles, isLoading, isAdmin: roles.includes("admin"), isOrganizer: roles.includes("organizer"), isStaff: roles.includes("admin") || roles.includes("organizer") };
 }
 
-export async function signOut() {
-  await supabase.auth.signOut();
-}
+export async function saveProfile(userId: string, profile: FirestoreUserProfile) { return saveUserProfile(userId, profile); }
+export async function signOut() { await firebaseSignOut(); }
