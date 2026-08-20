@@ -60,12 +60,11 @@ export function communitiesQuery(search?: string) {
       const communities = (await rows<CommunityRow>("communities", [["published", true]])).filter(
         (item) => !term || `${item.name} ${item.description ?? ""}`.toLowerCase().includes(term),
       );
-      const members = await rows<CommunityMember>("community_members");
       return communities
         .sort((a, b) => a.name.localeCompare(b.name))
         .map((community) => ({
           ...community,
-          member_count: members.filter((member) => member.community_id === community.id).length,
+          member_count: Number(community.member_count ?? 0),
         }));
     },
   });
