@@ -230,12 +230,7 @@ function MobileProfileMenu({
           />
           <div className="absolute right-3 top-[4.25rem] w-[min(18rem,calc(100vw-1.5rem))] rounded-3xl border border-slate-200 bg-white p-3 shadow-2xl">
             <div className="rounded-2xl bg-slate-50 p-4">
-              <img
-                src="/copex-logo.png"
-                alt="COPEX"
-                className="h-8 w-24 object-contain object-left"
-              />
-              <div className="mt-3 flex items-center gap-3">
+              <div className="flex items-center gap-3">
                 <div className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-primary text-sm font-bold text-primary-foreground">
                   {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt="" className="size-full object-cover" />
