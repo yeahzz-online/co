@@ -126,6 +126,28 @@ export function notificationsQuery(userId: string | undefined) {
   });
 }
 
+export function referralsQuery(userId: string | undefined) {
+  return queryOptions({
+    queryKey: ["referrals", userId],
+    enabled: !!userId,
+    queryFn: async () =>
+      (await rows<Record<string, unknown>>("referrals", [["referrer_id", userId]])).length,
+  });
+}
+
+export async function recordReferral(referrerId: string, referredUserId: string) {
+  if (!referrerId || referrerId === referredUserId) return;
+  await setDoc(
+    documentRef(`referrals/${referrerId}_${referredUserId}`),
+    {
+      referrer_id: referrerId,
+      referred_user_id: referredUserId,
+      created_at: new Date().toISOString(),
+    },
+    { merge: true },
+  );
+}
+
 export function myMembershipsQuery(userId: string | undefined) {
   return queryOptions({
     queryKey: ["my-memberships", userId],

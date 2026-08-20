@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signInWithGitHub, signInWithGoogle } from "@/integrations/firebase/auth";
 import { saveProfile, useAuth, useProfile } from "@/hooks/use-auth";
+import { recordReferral } from "@/lib/data";
 
 export const Route = createFileRoute("/join")({ component: JoinPage });
 const interests = [
@@ -79,7 +80,7 @@ function JoinPage() {
           `MEM-${uid.slice(0, 8).toUpperCase()}`,
         points: 0,
         credits: 0,
-        referrals: 0,
+        referrals: profile?.referrals ?? 0,
         tasks_completed: 0,
         status: "ACTIVE",
         referral_access: true,
@@ -87,6 +88,9 @@ function JoinPage() {
         ...(referral ? { referred_by: referral } : {}),
         whatsapp_verified: false,
       });
+      if (referral && referral !== uid && !profile?.referred_by) {
+        await recordReferral(referral, uid);
+      }
     },
     onSuccess: () => {
       setSubmitted(true);
